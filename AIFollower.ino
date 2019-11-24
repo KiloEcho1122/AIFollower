@@ -1,10 +1,11 @@
+#include <HMC5883L.h>
+
 
 
 
 // Imports
 #include <Wire.h>
-#include <SoftwareSerial.h>
-#include "./HMC5883L.h"    
+#include <SoftwareSerial.h>  
 #include "./TinyGPS.h"                 // Use local version of this library
 #include "./AIFollowerDefinition.h"
 
@@ -128,16 +129,16 @@ float geoHeading() {
 }
 
 void setSpeedMotorA(int speed) {
-  digitalWrite(MOTOR_A_IN_1_PIN, LOW);
-  digitalWrite(MOTOR_A_IN_2_PIN, HIGH);
+  digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
+  digitalWrite(MOTOR_A_IN_2_PIN, LOW);
   
   // set speed to 200 out of possible range 0~255
   analogWrite(MOTOR_A_EN_PIN, speed);
 }
 
 void setSpeedMotorB(int speed) {
-  digitalWrite(MOTOR_B_IN_1_PIN, LOW);
-  digitalWrite(MOTOR_B_IN_2_PIN, HIGH);
+  digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
+  digitalWrite(MOTOR_B_IN_2_PIN, LOW);
   
   // set speed to 200 out of possible range 0~255
   analogWrite(MOTOR_B_EN_PIN, speed);
@@ -162,7 +163,7 @@ void stop() {
 }
 
 void drive(int distance, float turn) {
-  int fullSpeed = 200;
+  int fullSpeed = 160;
   int stopSpeed = 0;
 
   // drive to location
@@ -174,7 +175,7 @@ void drive(int distance, float turn) {
   }
   
   int autoThrottle = constrain(s, stopSpeed, fullSpeed);
-  autoThrottle = 230;
+  autoThrottle = 160;
 
   float t = turn;
   while (t < -180) t += 360;
@@ -209,37 +210,44 @@ void driveTo(struct GeoLoc &loc, int timeout) {
   nss.listen();
   GeoLoc coolerLoc = checkGPS();
   bluetoothSerial.listen();
- Serial.print("Phone - "); Serial.print(loc.lat,7); Serial.print(", "); Serial.println(loc.lon,7);
- Serial.print("Module - ");  Serial.print(coolerLoc.lat,7); Serial.print(", "); Serial.println(coolerLoc.lon,7);
+ 
+float d = 0;
+ //Serial.println(geoHeading());
 
   if (coolerLoc.lat != 0 && coolerLoc.lon != 0 && enabled) {
-    float d = 0;
-    //Start move loop here
-//    do {
-      nss.listen();
-      coolerLoc = checkGPS();
-      bluetoothSerial.listen();
+      do{
+           nss.listen();
+           coolerLoc = checkGPS();
+           bluetoothSerial.listen();
+           d = geoDistance(coolerLoc, loc);
+           Serial.print("Phone - "); Serial.print(loc.lat,7); Serial.print(", "); Serial.println(loc.lon,7);
+           Serial.print("Module - ");  Serial.print(coolerLoc.lat,7); Serial.print(", "); Serial.println(coolerLoc.lon,7);
+            
+           float t = geoBearing(coolerLoc, loc) - geoHeading();
       
-      d = geoDistance(coolerLoc, loc);
-      Serial.println(d);
-//      float t = geoBearing(coolerLoc, loc) - geoHeading();
-//      
-//      Serial.print("Distance: ");
-//      Serial.println(geoDistance(coolerLoc, loc));
-//    
-//      Serial.print("Bearing: ");
-//      Serial.println(geoBearing(coolerLoc, loc));
-//
-//      Serial.print("heading: ");
-//      Serial.println(geoHeading());
-//      
-//      drive(d, t);
-//      timeout -= 1;
-//    } while (d > 3.0 && enabled && timeout>0);
-//
-//    stop();
- }
+          Serial.print("Distance: ");
+          Serial.println(geoDistance(coolerLoc, loc));
+        
+          Serial.print("Bearing: ");
+          Serial.println(geoBearing(coolerLoc, loc));
+    
+          Serial.print("heading: ");
+          Serial.println(geoHeading());
+    
+          Serial.print("t: ");
+          Serial.println(t);
+    
+          
+          drive(d, t);
+          timeout -= 1;
+          
+        }while(d > 3.0 && enabled && timeout>0);
+
+          stop();
+  }
 }
+ 
+
 
 void setupCompass() {
    /* Initialise the compass */
@@ -284,7 +292,7 @@ void setup()
   Serial.begin(4800);
 
 // Compass
-//  setupCompass();
+  setupCompass();
   
   //GPS
   nss.begin(9600);
@@ -293,24 +301,60 @@ void setup()
   bluetoothSerial.begin(9600);
 }
 
+void compassTest(){
+  Vector norm = compass.readNormalize();
 
+  // Calculate heading
+  float heading = atan2(norm.YAxis, norm.XAxis);
+
+  // Set declination angle on your location and fix heading
+  // You can find your declination on: http://magnetic-declination.com/
+  // (+) Positive or (-) for negative
+  // For Bytom / Poland declination angle is 4'26E (positive)
+  // Formula: (deg + (min / 60.0)) / (180 / M_PI);
+  float declinationAngle = (-2.0 + (-22.0 / 60.0)) / (180 / M_PI);
+  heading += declinationAngle;
+
+  // Correct for heading < 0deg and heading > 360deg
+  if (heading < 0)
+  {
+    heading += 2 * PI;
+  }
+
+  if (heading > 2 * PI)
+  {
+    heading -= 2 * PI;
+  }
+
+  // Convert to degrees
+  float headingDegrees = heading * 180/M_PI; 
+
+  // Output
+  Serial.print(" Heading = ");
+  Serial.print(heading);
+  Serial.print(" Degress = ");
+  Serial.print(headingDegrees);
+  Serial.println();
+
+  delay(100);
+  }
 
 void loop()
 { 
 
- 
+ //compassTest();
   bluetoothSerial.listen();
 
   if(bluetoothSerial.available() > 0 && enabled == false ){
     state = bluetoothSerial.read();
-  //  Serial.println(state);
+ //  Serial.println(state);
 
   }
 
   if (state == 70) { //forward "F"
      
-      analogWrite(MOTOR_A_EN_PIN, 130);
-      analogWrite(MOTOR_B_EN_PIN, 130);
+      analogWrite(MOTOR_A_EN_PIN, 160);
+      analogWrite(MOTOR_B_EN_PIN, 160);
       digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
       digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
@@ -319,7 +363,7 @@ void loop()
     }
 
     if (state == 76) { //left "F"
-      analogWrite(MOTOR_B_EN_PIN, 130);
+      analogWrite(MOTOR_B_EN_PIN, 160);
       digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
    
@@ -328,14 +372,14 @@ void loop()
 
     if (state == 82) {//right "R"
       
-      analogWrite(MOTOR_A_EN_PIN, 130);
+      analogWrite(MOTOR_A_EN_PIN, 160);
        digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
     }
     
     if (state == 66) { //reverse/back "B"
-      analogWrite(MOTOR_A_EN_PIN, 130);
-      analogWrite(MOTOR_B_EN_PIN, 130);
+      analogWrite(MOTOR_A_EN_PIN, 160);
+      analogWrite(MOTOR_B_EN_PIN, 160);
       digitalWrite(MOTOR_A_IN_1_PIN, LOW);
       digitalWrite(MOTOR_A_IN_2_PIN, HIGH);  
       digitalWrite(MOTOR_B_IN_1_PIN, LOW);
@@ -407,7 +451,8 @@ int stateRec;
   phoneLoc.lat = bilat.toFloat();
   phoneLoc.lon = bilon.toFloat();
 
-
+ if (phoneLoc.lat != 0 && phoneLoc.lon != 0 ) {
  
    driveTo(phoneLoc, GPS_STREAM_TIMEOUT);
+ }
 }
