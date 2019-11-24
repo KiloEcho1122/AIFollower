@@ -162,7 +162,7 @@ void stop() {
 }
 
 void drive(int distance, float turn) {
-  int fullSpeed = 230;
+  int fullSpeed = 200;
   int stopSpeed = 0;
 
   // drive to location
