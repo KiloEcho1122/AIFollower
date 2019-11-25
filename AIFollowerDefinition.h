@@ -14,6 +14,9 @@
 #define MOTOR_B_IN_1_PIN 8
 #define MOTOR_B_IN_2_PIN 7
 
+#define MOTOR_A_OFFSET 30
+#define MOTOR_B_OFFSET -10
+
 // How often the GPS should update in MS
 // Keep this above 1000
 #define GPS_UPDATE_INTERVAL 1000

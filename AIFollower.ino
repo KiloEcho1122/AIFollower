@@ -133,7 +133,7 @@ void setSpeedMotorA(int speed) {
   digitalWrite(MOTOR_A_IN_2_PIN, LOW);
   
   // set speed to 200 out of possible range 0~255
-  analogWrite(MOTOR_A_EN_PIN, speed);
+  analogWrite(MOTOR_A_EN_PIN, speed + MOTOR_A_OFFSET);
 }
 
 void setSpeedMotorB(int speed) {
@@ -141,7 +141,7 @@ void setSpeedMotorB(int speed) {
   digitalWrite(MOTOR_B_IN_2_PIN, LOW);
   
   // set speed to 200 out of possible range 0~255
-  analogWrite(MOTOR_B_EN_PIN, speed);
+  analogWrite(MOTOR_B_EN_PIN, speed + MOTOR_B_OFFSET);
 }
 
 void setSpeed(int speed)
@@ -353,45 +353,45 @@ void loop()
 
   if (state == 70) { //forward "F"
      
-      analogWrite(MOTOR_A_EN_PIN, 160);
-      analogWrite(MOTOR_B_EN_PIN, 160);
+      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
+      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
       digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
       digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
-      
+     // Serial.print(160 + MOTOR_A_OFFSET); Serial.print("  :   "); Serial.println(160 + MOTOR_B_OFFSET);
     }
 
-    if (state == 76) { //left "F"
-      analogWrite(MOTOR_B_EN_PIN, 160);
+   else if (state == 76) { //left "F"
+      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
       digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
    
     }
 
 
-    if (state == 82) {//right "R"
+  else if (state == 82) {//right "R"
       
-      analogWrite(MOTOR_A_EN_PIN, 160);
+      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
        digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
       digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
     }
     
-    if (state == 66) { //reverse/back "B"
-      analogWrite(MOTOR_A_EN_PIN, 160);
-      analogWrite(MOTOR_B_EN_PIN, 160);
+  else if (state == 66) { //reverse/back "B"
+      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
+      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
       digitalWrite(MOTOR_A_IN_1_PIN, LOW);
       digitalWrite(MOTOR_A_IN_2_PIN, HIGH);  
       digitalWrite(MOTOR_B_IN_1_PIN, LOW);
       digitalWrite(MOTOR_B_IN_2_PIN, HIGH); 
     }
     
-    if (state == 83) { //stop "S"
+    else if (state == 83) { //stop "S"
       stop();
       enabled = false;
     }
 
-    if (state == 69){ // "Enabled E"
+    else if (state == 69){ // "Enabled E"
       delay(100);
       enabled = true;
       ReceiveGPSData();
@@ -418,12 +418,12 @@ int stateRec;
             return;
             }
 
-          if (stateRec == 64){
+          else if (stateRec == 64){
               isGPSLonstreaming = true;
               isGPSLatstreaming = false;
 
           }
-          if (stateRec == 35){
+          else if (stateRec == 35){
               isGPSLatstreaming = true;
               isGPSLonstreaming = false;
 
@@ -433,7 +433,7 @@ int stateRec;
               bilon += char(stateRec);
 
           }
-          if (isGPSLatstreaming == true && stateRec != 35){
+          else if (isGPSLatstreaming == true && stateRec != 35){
               
             if (stateRec == 36){
               isPhoneGPSready = true;
