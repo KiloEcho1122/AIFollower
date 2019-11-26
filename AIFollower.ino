@@ -53,7 +53,8 @@ GeoLoc gpsdump(TinyGPS &gps) {
   coolerLoc.lat = flat;
   coolerLoc.lon = flon;
 
- // Serial.print(flat, 7); Serial.print(", "); Serial.println(flat, 7);
+ // Serial.print("Module - ");  Serial.print(coolerLoc.lat,7); Serial.print(", "); Serial.println(coolerLoc.lon,7);
+
 
   return coolerLoc;
 }
@@ -61,7 +62,7 @@ GeoLoc gpsdump(TinyGPS &gps) {
 // Feed data as it becomes available 
 bool feedgps() {
   while (nss.available()) {
-   // Serial.write(nss.read());
+ //Serial.write(nss.read());
     if (gps.encode(nss.read()))
       return true;
   }
@@ -207,6 +208,9 @@ void driveTo(struct GeoLoc &loc, int timeout) {
   nss.listen();
   GeoLoc coolerLoc = checkGPS();
   bluetoothSerial.listen();
+
+   Serial.print("Phone - "); Serial.print(loc.lat,7); Serial.print(", "); Serial.println(loc.lon,7);
+   Serial.print("Module - ");  Serial.print(coolerLoc.lat,7); Serial.print(", "); Serial.println(coolerLoc.lon,7);
  
 float d = 0;
  //Serial.println(geoHeading());
@@ -216,8 +220,6 @@ float d = 0;
            nss.listen();
            coolerLoc = checkGPS();
            bluetoothSerial.listen();
-
-           
            
            d = geoDistance(coolerLoc, loc);
            Serial.print("Phone - "); Serial.print(loc.lat,7); Serial.print(", "); Serial.println(loc.lon,7);
@@ -238,7 +240,7 @@ float d = 0;
           Serial.println(t);
     
           
-          drive(d, t);
+         drive(d, t);
           timeout -= 1;
           
         }while(d > 3.0 && enabled && timeout>0);
@@ -359,60 +361,60 @@ void testDriveNorth() {
 void loop()
 { 
 
-testDriveNorth();
-//  bluetoothSerial.listen();
-//
-//  if(bluetoothSerial.available() > 0 && enabled == false ){
-//    state = bluetoothSerial.read();
-// //  Serial.println(state);
-//
-//  }
-//
-//  if (state == 70 && enabled == false) { //forward "F"
-//     
-//      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
-//      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
-//      digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
-//      digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
-//      digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
-//      digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
-//     // Serial.print(160 + MOTOR_A_OFFSET); Serial.print("  :   "); Serial.println(160 + MOTOR_B_OFFSET);
-//    }
-//
-//   else if (state == 76 && enabled == false) { //left "F"
-//      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
-//      digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
-//      digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
-//   
-//    }
-//
-//
-//  else if (state == 82 && enabled == false) {//right "R"
-//      
-//      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
-//       digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
-//      digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
-//    }
-//    
-//  else if (state == 66 && enabled == false) { //reverse/back "B"
-//      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
-//      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
-//      digitalWrite(MOTOR_A_IN_1_PIN, LOW);
-//      digitalWrite(MOTOR_A_IN_2_PIN, HIGH);  
-//      digitalWrite(MOTOR_B_IN_1_PIN, LOW);
-//      digitalWrite(MOTOR_B_IN_2_PIN, HIGH); 
-//    }
-//    
-//    else if (state == 83) { //stop "S"
-//      stop();
-//      enabled = false;
-//    }
-//
-//    else if (state == 69){ // "Enabled E"
-//      delay(100);
-//      enabled = true;
-//      ReceiveGPSData();
-//    }
+//testDriveNorth();
+  bluetoothSerial.listen();
+
+  if(bluetoothSerial.available() > 0 && enabled == false ){
+    state = bluetoothSerial.read();
+  Serial.println(state);
+
+  }
+
+  if (state == 70 && enabled == false) { //forward "F"
+     
+      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
+      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
+      digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
+      digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
+      digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
+      digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
+     // Serial.print(160 + MOTOR_A_OFFSET); Serial.print("  :   "); Serial.println(160 + MOTOR_B_OFFSET);
+    }
+
+   else if (state == 76 && enabled == false) { //left "F"
+      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
+      digitalWrite(MOTOR_B_IN_1_PIN, HIGH);
+      digitalWrite(MOTOR_B_IN_2_PIN, LOW); 
+   
+    }
+
+
+  else if (state == 82 && enabled == false) {//right "R"
+      
+      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
+       digitalWrite(MOTOR_A_IN_1_PIN, HIGH);
+      digitalWrite(MOTOR_A_IN_2_PIN, LOW);  
+    }
+    
+  else if (state == 66 && enabled == false) { //reverse/back "B"
+      analogWrite(MOTOR_A_EN_PIN, 160 + MOTOR_A_OFFSET);
+      analogWrite(MOTOR_B_EN_PIN, 160 + MOTOR_B_OFFSET);
+      digitalWrite(MOTOR_A_IN_1_PIN, LOW);
+      digitalWrite(MOTOR_A_IN_2_PIN, HIGH);  
+      digitalWrite(MOTOR_B_IN_1_PIN, LOW);
+      digitalWrite(MOTOR_B_IN_2_PIN, HIGH); 
+    }
+    
+    else if (state == 83) { //stop "S"
+      stop();
+      enabled = false;
+    }
+
+    else if (state == 69){ // "Enabled E"
+      delay(100);
+      enabled = true;
+      ReceiveGPSData();
+    }
   
 }
 
